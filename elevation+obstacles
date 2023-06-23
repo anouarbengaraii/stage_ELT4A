@@ -1,0 +1,59 @@
+import sys
+import math
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QLabel, QVBoxLayout, QWidget, QPushButton
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Calcul elevation")
+        self.setGeometry(200, 200, 300, 300)
+
+        self.table_widget = QTableWidget(self)
+        self.table_widget.setGeometry(50, 50, 400, 100)
+        self.table_widget.setColumnCount(4)
+        self.table_widget.setRowCount(2)
+        self.table_widget.setHorizontalHeaderLabels(["Longitude du satellite", "Longitude du lieu", "Latitude du lieu", "Hauteur de l'antenne"])
+
+        self.calculate_button = QPushButton("Calculer élévation", self)
+        self.calculate_button.setGeometry(50, 170, 150, 30)
+        self.calculate_button.clicked.connect(self.show_elevation_table)
+
+        self.elevation_label = QLabel("Élévation : ", self)
+        self.elevation_label.setGeometry(50, 220, 400, 30)
+        self.table_widget.resizeColumnsToContents()
+
+    def show_elevation_table(self):
+        satellite_longitude = float(self.table_widget.item(1, 0).text())
+        location_longitude = float(self.table_widget.item(1, 1).text())
+        location_latitude = float(self.table_widget.item(1, 2).text())
+        antenna_height = float(self.table_widget.item(1, 3).text())
+        elevation = math.degrees(math.atan((math.cos(math.radians(satellite_longitude - location_longitude)) * math.cos(math.radians(location_latitude)) - 0.151269) / math.sin(math.acos(math.cos(math.radians(satellite_longitude - location_longitude)) * math.cos(math.radians(location_latitude))))))
+
+        self.elevation_label.setText(f"Élévation : {elevation}")
+
+        # Create a new window for the obstacles
+        self.elevation_window = ElevationWindow()
+        self.elevation_window.show()
+
+class ElevationWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Obstacles")
+        self.setGeometry(500, 200, 700, 300)
+
+        self.table_widget = QTableWidget(self)
+        self.table_widget.setGeometry(50, 50, 600, 200)
+        self.table_widget.setColumnCount(32)
+        self.table_widget.setRowCount(4)
+
+        # Set the column labels
+        column_labels = [f"{i}-{i+10}" for i in range(0, 360, 10)]
+        self.table_widget.setHorizontalHeaderLabels(column_labels)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
