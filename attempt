@@ -37,43 +37,45 @@ class MainWindow(QMainWindow):
 
         self.elevation_label.setText(f"Élévation : {elevation}")
 
-        self.elevation_window = ElevationWindow(elevation)
+        self.elevation_window = ElevationWindow(antenna_height)
         self.elevation_window.show()
 
 class ElevationWindow(QWidget):
-    def __init__(self, elevation):
+    def __init__(self, antenna_height):
         super().__init__()
         self.setWindowTitle("Obstacles")
         self.setGeometry(500, 200, 700, 300)
-        self.setup_ui(elevation)
+        self.antenna_height = antenna_height
+        self.setup_ui()
 
-    def setup_ui(self, elevation):
+    def setup_ui(self):
+        self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
+
+        self.message_label = QLabel("Veuillez renseigner dans chaque intervalle la hauteur de l'obstacle et la distance par rapport à celui-ci", self)
+        self.layout.addWidget(self.message_label)
+
         self.table_widget = QTableWidget(self)
-        self.table_widget.setGeometry(50, 50, 600, 200)
         self.table_widget.setColumnCount(36)
         self.table_widget.setRowCount(4)
         column_labels = [f"{i}-{i+10}" for i in range(0, 361, 10)]
         self.table_widget.setHorizontalHeaderLabels(column_labels)
+        self.layout.addWidget(self.table_widget)
 
-        # Get the antenna height from line 1 of the table
-        antenna_height = float(self.table_widget.item(0, 0).text())
+        self.calculate_button = QPushButton("Calculer", self)
+        self.calculate_button.clicked.connect(self.calculate_arctan_values)
+        self.layout.addWidget(self.calculate_button)
 
-        # Calculate the arctangent value for each column
+    def calculate_arctan_values(self):
         for col in range(self.table_widget.columnCount()):
-            # Get the height value from line 2 of the table
-            obstacle_height = float(self.table_widget.item(1, col).text())
-
-            # Get the distance value from line 3 of the table
-            obstacle_distance = float(self.table_widget.item(2, col).text())
-
-            # Calculate the arctangent value
-            arctan_value = math.degrees(math.atan((obstacle_height - antenna_height) / obstacle_distance))
-
-            # Create a QTableWidgetItem with the arctangent value
-            item = QTableWidgetItem(str(arctan_value))
-
-            # Set the QTableWidgetItem in line 4 of the table
-            self.table_widget.setItem(3, col, item)
+            height_item = self.table_widget.item(1, col)
+            distance_item = self.table_widget.item(2, col)
+            if height_item and distance_item:
+                height = float(height_item.text())
+                distance = float(distance_item.text())
+                result = math.degrees(math.atan((height - self.antenna_height) / distance))
+                result_item = QTableWidgetItem(str(result))
+                self.table_widget.setItem(3, col, result_item)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
