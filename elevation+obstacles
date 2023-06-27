@@ -1,19 +1,23 @@
 import sys
 import math
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QLabel, QVBoxLayout, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QLabel, QVBoxLayout, QWidget, QPushButton, QTextEdit
 
 class MainWindow(QMainWindow):
-    def __init__(self): #Constructeur
-        super().__init__()  #Constructeur
-
-        self.setWindowTitle("Calcul elevation") #titre du tableau 1
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Calcul elevation")
         self.setGeometry(200, 200, 300, 300)
+        self.setup_ui()
 
+    def setup_ui(self):
         self.table_widget = QTableWidget(self)
         self.table_widget.setGeometry(50, 50, 400, 100)
         self.table_widget.setColumnCount(4)
         self.table_widget.setRowCount(2)
         self.table_widget.setHorizontalHeaderLabels(["Longitude du satellite", "Longitude du lieu", "Latitude du lieu", "Hauteur de l'antenne"])
+
+        self.message_label = QLabel("Veuillez renseigner les coordonnées du lieu, du satellite et la hauteur de l'antenne", self)
+        self.message_label.setGeometry(50, 10, 400, 30)
 
         self.calculate_button = QPushButton("Calculer élévation", self)
         self.calculate_button.setGeometry(50, 170, 150, 30)
@@ -21,6 +25,7 @@ class MainWindow(QMainWindow):
 
         self.elevation_label = QLabel("Élévation : ", self)
         self.elevation_label.setGeometry(50, 220, 400, 30)
+
         self.table_widget.resizeColumnsToContents()
 
     def show_elevation_table(self):
@@ -32,30 +37,32 @@ class MainWindow(QMainWindow):
 
         self.elevation_label.setText(f"Élévation : {elevation}")
 
-        # Create a new window for the obstacles
         self.elevation_window = ElevationWindow()
         self.elevation_window.show()
 
 class ElevationWindow(QWidget):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Obstacles")
         self.setGeometry(500, 200, 700, 300)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+
+        self.message_label = QLabel("Veuillez renseigner dans chaque intervalle la hauteur de l'obstacle et la distance par rapport à celui-ci.\nDans la première ligne (ligne 2), veuillez renseigner la hauteur de l'obstacle.\nDans la deuxième ligne (ligne 3), veuillez renseigner la distance à l'obstacle.", self)
+        self.message_label.setWordWrap(True)
+        layout.addWidget(self.message_label)
 
         self.table_widget = QTableWidget(self)
-        self.table_widget.setGeometry(50, 50, 600, 200)
         self.table_widget.setColumnCount(36)
         self.table_widget.setRowCount(4)
-
-        # Set the column labels
         column_labels = [f"{i}-{i+10}" for i in range(0, 361, 10)]
-
         self.table_widget.setHorizontalHeaderLabels(column_labels)
+        layout.addWidget(self.table_widget)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
-
