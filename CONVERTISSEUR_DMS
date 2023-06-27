@@ -1,0 +1,37 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+
+class DMSConverter(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Convertisseur DMS")
+        self.setGeometry(200, 200, 300, 200)
+
+        self.input_label = QLabel("Coordonnées DMS:", self)
+        self.input_label.setGeometry(50, 50, 200, 30)
+
+        self.input_line_edit = QLineEdit(self)
+        self.input_line_edit.setGeometry(50, 80, 200, 30)
+
+        self.convert_button = QPushButton("Convertir", self)
+        self.convert_button.setGeometry(50, 120, 100, 30)
+        self.convert_button.clicked.connect(self.convert_dms_to_decimal)
+
+        self.output_label = QLabel("Coordonnées décimales:", self)
+        self.output_label.setGeometry(50, 160, 200, 30)
+
+    def convert_dms_to_decimal(self):
+        dms_coords = self.input_line_edit.text()
+
+        degrees, minutes, seconds = map(float, dms_coords.split())
+
+        decimal_coords = degrees + (minutes / 60) + (seconds / 3600)
+
+        self.output_label.setText(f"Coordonnées décimales: {decimal_coords}")
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = DMSConverter()
+    window.show()
+    sys.exit(app.exec_())
